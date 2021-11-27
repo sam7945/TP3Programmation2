@@ -53,12 +53,12 @@ public class ListeEuclidienne<E> implements Iterable<E> {
     private class Chainon {
         E element;
         Chainon precedent;
-        Chainon suivent;
+        Chainon suivant;
 
         public Chainon(E element, Chainon precedent, Chainon suivent) {
             this.element = element;
             this.precedent = precedent;
-            this.suivent = suivent;
+            this.suivant = suivent;
         }
     }
 
@@ -113,7 +113,7 @@ public class ListeEuclidienne<E> implements Iterable<E> {
         public E next() throws NoSuchElementException {
             E element = courant.element;
             if (direction == Direction.HORAIRE)
-                courant = courant.suivent;
+                courant = courant.suivant;
             else
                 courant = courant.precedent;
             return element;
@@ -163,6 +163,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @throws NoSuchElementException Lorsque la {@code ListeEuclidienne} est vide.
      */
     public E lire() throws NoSuchElementException {
+        if(estVide())
+            throw  new NoSuchElementException();
         return debut.element;
     }
 
@@ -206,6 +208,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @throws ListeVideException Lancé si la {@code ListeEuclidienne} est vide.
      */
     public void ecrire(E element) throws ListeVideException {
+        if(estVide())
+            throw new ListeVideException();
         debut.element = element;
     }
 
@@ -222,22 +226,26 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @param element Une référence sur l'élément à insérer.
      */
     public void inserer(E element) {
-        if (debut == null)
+        if (estVide()) {
             debut = new Chainon(element, debut, debut);
-        else {
+            fin = debut;
+            debut.precedent = fin;
+            debut.suivant = fin;
+        } else {
             if (getDirection() == Direction.HORAIRE) {
                 Chainon temp = new Chainon(element, fin, debut);
-                fin.suivent = temp;
+                fin.suivant = temp;
                 debut.precedent = temp;
                 debut = debut.precedent;
             } else if (getDirection() == Direction.ANTIHORAIRE) {
-                Chainon temp = new Chainon(element, debut, debut.suivent);
-                debut.suivent.precedent = temp;
-                debut.suivent = temp;
-                debut = debut.suivent;
+                Chainon temp = new Chainon(element, debut, debut.suivant);
+                debut.suivant.precedent = temp;
+                debut.suivant = temp;
+                debut = debut.suivant;
+                fin = debut.precedent;
             }
-            taille++;
         }
+        taille++;
     }
 
 
@@ -247,9 +255,11 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @throws ListeVideException Lancé lorsque la {@code ListeEuclidienne} est vide.
      */
     public void avancer() throws ListeVideException {
+        if (debut == null)
+            throw new ListeVideException();
         if (this.direction == Direction.HORAIRE) {
-            debut = debut.suivent;
-            fin = fin.suivent;
+            debut = debut.suivant;
+            fin = fin.suivant;
         } else if (this.direction == Direction.ANTIHORAIRE) {
             debut = debut.precedent;
             fin = fin.precedent;
@@ -277,9 +287,9 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * <p>Change la direction de rotation de la tête de lecture.</p>
      */
     public void inverser() {
-        if(direction == Direction.HORAIRE)
+        if (direction == Direction.HORAIRE)
             direction = Direction.ANTIHORAIRE;
-        else if(direction == Direction.ANTIHORAIRE)
+        else if (direction == Direction.ANTIHORAIRE)
             direction = Direction.HORAIRE;
     }
 
@@ -293,7 +303,27 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @throws ListeVideException Lancé lorsque la structure est vide.
      */
     public E supprimer() throws ListeVideException {
-        return null;
+        if (estVide())
+            throw new ListeVideException();
+        Chainon retirer = debut;
+
+        if (taille > 1) {
+            if (getDirection() == Direction.HORAIRE) {
+                fin.suivant = debut.suivant;
+                debut.suivant.precedent = fin;
+                debut = debut.suivant;
+            } else if (getDirection() == Direction.ANTIHORAIRE) {
+                fin.suivant = debut.suivant;
+                debut.suivant.precedent = fin;
+                debut = fin;
+                fin = fin.precedent;
+            }
+        } else {
+            debut = null;
+        }
+        taille--;
+
+        return retirer.element;
     }
 
 
@@ -313,6 +343,16 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      *              pré-condition : non {@code null}.
      */
     public void insererTout(ListeEuclidienne<E> liste) {
+        for (int i = 0; i < this.taille() - 1; i++) {
+            avancer();
+        }
+        liste.inverser();
+        for (int i = 0; i < liste.taille(); i++) {
+            inserer(liste.lire());
+            liste.avancer();
+        }
+        liste.inverser();
+
     }
 
 
@@ -348,7 +388,13 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      */
     public static <E, F, G>
     ListeEuclidienne<G> zip(ListeEuclidienne<E> liste1, ListeEuclidienne<F> liste2, int n, BiFunction<E, F, G> fusion) {
-        return null;
+        ListeEuclidienne<G> newList = new ListeEuclidienne<>();
+        for (int i = 0; i < n; i++) {
+            newList.inserer(fusion.apply(liste1.lire(), liste2.lire()));
+            liste1.avancer();
+            liste2.avancer();
+        }
+        return newList;
     }
 
 
