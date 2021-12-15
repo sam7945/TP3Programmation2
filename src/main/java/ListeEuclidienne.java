@@ -348,8 +348,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
                 inserer(liste.lire());
                 liste.avancer();
             }
-            int taille  = taille() - liste.taille();
-            avancer(taille-1);
+            int taille = taille() - liste.taille();
+            avancer(taille - 1);
         }
     }
 
@@ -385,7 +385,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * aux éléments des {@code ListeEuclidienne} en entrées.
      */
     public static <E, F, G>
-    ListeEuclidienne<G> zip(ListeEuclidienne<E> liste1, ListeEuclidienne<F> liste2,
+    ListeEuclidienne<G> zip(ListeEuclidienne<E> liste1,
+                            ListeEuclidienne<F> liste2,
                             int n, BiFunction<E, F, G> fusion) {
         ListeEuclidienne<G> newList = new ListeEuclidienne<>();
         newList.inverser();
@@ -401,13 +402,11 @@ public class ListeEuclidienne<E> implements Iterable<E> {
         newList.inverser();
         newList.avancer();
 
-        while (nbTourA%liste1.taille != 0)
-        {
+        while (nbTourA % liste1.taille != 0) {
             liste1.avancer();
             nbTourA++;
         }
-        while (nbTourB%liste2.taille != 0)
-        {
+        while (nbTourB % liste2.taille != 0) {
             liste2.avancer();
             nbTourB++;
         }
@@ -430,7 +429,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @return
      */
     public static <E>
-    ListeEuclidienne<E> concatEuclidienne(ListeEuclidienne<E> liste1, ListeEuclidienne<E> liste2) {
+    ListeEuclidienne<E> concatEuclidienne(ListeEuclidienne<E> liste1,
+                                          ListeEuclidienne<E> liste2) {
         ListeEuclidienne<ListeEuclidienne<E>> temp1;
         ListeEuclidienne<ListeEuclidienne<E>> temp2;
 
@@ -443,7 +443,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
         }
 
         while (0 != temp2.taille()) {
-            ListeEuclidienne<ListeEuclidienne<E>> temp3 = new ListeEuclidienne<>();
+            ListeEuclidienne<ListeEuclidienne<E>> temp3 =
+                    new ListeEuclidienne<>();
 
             while (!temp2.estVide()) {
                 ListeEuclidienne<E> element = temp1.supprimer();
