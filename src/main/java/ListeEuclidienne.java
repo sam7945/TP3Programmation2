@@ -31,7 +31,7 @@ import java.util.function.BiFunction;
  * @param <E> Le type des éléments du contenant.
  */
 public class ListeEuclidienne<E> implements Iterable<E> {
-    private Direction direction;
+    private Direction direction = Direction.HORAIRE;
     private Chainon debut;
     private Chainon fin;
     private int taille = 0;
@@ -125,7 +125,6 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * <p>Construit une {@code ListeEuclidienne} vide.</p>
      */
     public ListeEuclidienne() {
-        this.direction = Direction.HORAIRE;
     }
 
 
@@ -163,8 +162,8 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @throws NoSuchElementException Lorsque la {@code ListeEuclidienne} est vide.
      */
     public E lire() throws NoSuchElementException {
-        if(estVide())
-            throw  new NoSuchElementException();
+        if (estVide())
+            throw new NoSuchElementException();
         return debut.element;
     }
 
@@ -208,7 +207,7 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * @throws ListeVideException Lancé si la {@code ListeEuclidienne} est vide.
      */
     public void ecrire(E element) throws ListeVideException {
-        if(estVide())
+        if (estVide())
             throw new ListeVideException();
         debut.element = element;
     }
@@ -343,16 +342,15 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      *              pré-condition : non {@code null}.
      */
     public void insererTout(ListeEuclidienne<E> liste) {
-        for (int i = 0; i < this.taille() - 1; i++) {
-            avancer();
-        }
-        liste.inverser();
-        for (int i = 0; i < liste.taille(); i++) {
-            inserer(liste.lire());
+        if (!liste.estVide()) {
             liste.avancer();
+            for (int i = 0; i < liste.taille(); i++) {
+                inserer(liste.lire());
+                liste.avancer();
+            }
+            int taille  = taille() - liste.taille();
+            avancer(taille-1);
         }
-        liste.inverser();
-
     }
 
 
@@ -387,12 +385,31 @@ public class ListeEuclidienne<E> implements Iterable<E> {
      * aux éléments des {@code ListeEuclidienne} en entrées.
      */
     public static <E, F, G>
-    ListeEuclidienne<G> zip(ListeEuclidienne<E> liste1, ListeEuclidienne<F> liste2, int n, BiFunction<E, F, G> fusion) {
+    ListeEuclidienne<G> zip(ListeEuclidienne<E> liste1, ListeEuclidienne<F> liste2,
+                            int n, BiFunction<E, F, G> fusion) {
         ListeEuclidienne<G> newList = new ListeEuclidienne<>();
+        newList.inverser();
+        int nbTourA = 0;
+        int nbTourB = 0;
         for (int i = 0; i < n; i++) {
             newList.inserer(fusion.apply(liste1.lire(), liste2.lire()));
             liste1.avancer();
             liste2.avancer();
+            nbTourA++;
+            nbTourB++;
+        }
+        newList.inverser();
+        newList.avancer();
+
+        while (nbTourA%liste1.taille != 0)
+        {
+            liste1.avancer();
+            nbTourA++;
+        }
+        while (nbTourB%liste2.taille != 0)
+        {
+            liste2.avancer();
+            nbTourB++;
         }
         return newList;
     }
